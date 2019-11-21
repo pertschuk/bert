@@ -175,14 +175,21 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
       g = teacher_config.num_hidden_layers / bert_config.num_hidden_layers
 
       attention_loss = tf.add_n([
-          tf.reduce_sum(
-            tf.squared_difference(teacher.attention_scores[i*g], student_scores)
-          ) for i, student_scores in enumerate(model.attention_scores)])
+        tf.reduce_sum(
+          tf.squared_difference(teacher.attention_scores[i * g], student_scores)
+        ) for i, student_scores in enumerate(model.attention_scores)])
 
+      # project teacher hidden layers down to student hidden layers dims
+      teacher_hidden_layers = tf.layers.dense(teacher.get_all_encoder_layers(),
+                                              units=bert_config.hidden_size,
+                                              activation=modeling.get_activation(bert_config.hidden_act),
+                                              kernel_initializer=modeling.create_initializer(
+                                                bert_config.initializer_range)
+                                              )
       hidden_loss = tf.add_n([
-          tf.reduce_sum(
-            tf.squared_difference(teacher.get_all_encoder_layers(), student_hidden)
-          ) for i, student_hidden in enumerate(model.get_all_encoder_layers())])
+        tf.reduce_sum(
+          tf.squared_difference(teacher_hidden_layers[i * g], student_hidden)
+        ) for i, student_hidden in enumerate(model.get_all_encoder_layers())])
 
       embedding_loss = tf.reduce_sum(
         tf.squared_difference(
@@ -198,7 +205,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
           bert_config, model.get_pooled_output(), next_sentence_labels)
 
         masked_lm_loss = tf.reduce_mean(tf.squared_difference(teacher_masked_lm_logits,
-                                                                     student_masked_lm_logits))
+                                                              student_masked_lm_logits))
         sentence_pred_loss = tf.reduce_mean(tf.squared_difference(teacher_next_sent_logits,
                                                                   student_next_sent_logits))
 
