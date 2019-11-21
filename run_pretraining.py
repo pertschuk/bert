@@ -182,12 +182,13 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
         ) for i, student_scores in enumerate(model.attention_scores)])
 
       # project teacher hidden layers down to student hidden layers dims
-      teacher_hidden_layers = tf.layers.dense(teacher.get_all_encoder_layers(),
-                                              units=bert_config.hidden_size,
-                                              activation=modeling.get_activation(bert_config.hidden_act),
-                                              kernel_initializer=modeling.create_initializer(
-                                                bert_config.initializer_range)
-                                              )
+      teacher_hidden_layers = teacher.get_all_encoder_layers()
+        # tf.layers.dense(teacher.get_all_encoder_layers(),
+        #                                       units=bert_config.hidden_size,
+        #                                       activation=modeling.get_activation(bert_config.hidden_act),
+        #                                       kernel_initializer=modeling.create_initializer(
+        #                                         bert_config.initializer_range)
+        #                                       )
       hidden_loss = tf.add_n([
         tf.reduce_sum(
           tf.squared_difference(teacher_hidden_layers[i * g], student_hidden)
