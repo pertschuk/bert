@@ -21,6 +21,8 @@ from __future__ import print_function
 import os
 
 import tensorflow as tf
+from tensorflow.contrib import data as contrib_data
+
 
 import modeling
 import optimization
@@ -413,21 +415,27 @@ def input_fn_builder(input_files,
     batch_size = params["batch_size"]
 
     name_to_features = {
-      "input_ids":
-        tf.FixedLenFeature([max_seq_length], tf.int64),
-      "input_mask":
-        tf.FixedLenFeature([max_seq_length], tf.int64),
-      "segment_ids":
-        tf.FixedLenFeature([max_seq_length], tf.int64),
-      "masked_lm_positions":
-        tf.FixedLenFeature([max_predictions_per_seq], tf.int64),
-      "masked_lm_ids":
-        tf.FixedLenFeature([max_predictions_per_seq], tf.int64),
-      "masked_lm_weights":
-        tf.FixedLenFeature([max_predictions_per_seq], tf.float32),
-      "next_sentence_labels":
-        tf.FixedLenFeature([1], tf.int64),
+        "input_ids": tf.FixedLenFeature([max_seq_length], tf.int64),
+        "input_mask": tf.FixedLenFeature([max_seq_length], tf.int64),
+        "segment_ids": tf.FixedLenFeature([max_seq_length], tf.int64),
+        # Note: We keep this feature name `next_sentence_labels` to be
+        # compatible with the original data created by lanzhzh@. However, in
+        # the ALBERT case it does represent sentence_order_labels.
+        "next_sentence_labels": tf.FixedLenFeature([1], tf.int64),
     }
+
+    if False: #FLAGS.masked_lm_budget:
+      name_to_features.update({
+          "token_boundary":
+              tf.FixedLenFeature([max_seq_length], tf.int64)})
+    else:
+      name_to_features.update({
+          "masked_lm_positions":
+              tf.FixedLenFeature([max_predictions_per_seq], tf.int64),
+          "masked_lm_ids":
+              tf.FixedLenFeature([max_predictions_per_seq], tf.int64),
+          "masked_lm_weights":
+              tf.FixedLenFeature([max_predictions_per_seq], tf.float32)})
 
     # For training, we want a lot of parallel reading and shuffling.
     # For eval, we want no shuffling and parallel reading doesn't matter.
@@ -442,10 +450,10 @@ def input_fn_builder(input_files,
       # `sloppy` mode means that the interleaving is not exact. This adds
       # even more randomness to the training pipeline.
       d = d.apply(
-        tf.contrib.data.parallel_interleave(
-          tf.data.TFRecordDataset,
-          sloppy=is_training,
-          cycle_length=cycle_length))
+          contrib_data.parallel_interleave(
+              tf.data.TFRecordDataset,
+              sloppy=is_training,
+              cycle_length=cycle_length))
       d = d.shuffle(buffer_size=100)
     else:
       d = tf.data.TFRecordDataset(input_files)
@@ -458,11 +466,12 @@ def input_fn_builder(input_files,
     # and we *don't* want to drop the remainder, otherwise we wont cover
     # every sample.
     d = d.apply(
-      tf.contrib.data.map_and_batch(
-        lambda record: _decode_record(record, name_to_features),
-        batch_size=batch_size,
-        num_parallel_batches=num_cpu_threads,
-        drop_remainder=True))
+        tf.data.experimental.map_and_batch_with_legacy_function(
+            lambda record: _decode_record(record, name_to_features),
+            batch_size=batch_size,
+            num_parallel_batches=num_cpu_threads,
+            drop_remainder=True))
+    tf.logging.info(d)
     return d
 
   return input_fn
