@@ -202,7 +202,7 @@ class BertModel(object):
 
         # Run the stacked transformer.
         # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-        self.all_encoder_layers = transformer_model(
+        self.all_encoder_layers, self.attention_scores = transformer_model(
             input_tensor=self.embedding_output,
             attention_mask=attention_mask,
             hidden_size=config.hidden_size,
@@ -748,7 +748,7 @@ def attention_layer(from_tensor,
         context_layer,
         [batch_size, from_seq_length, num_attention_heads * size_per_head])
 
-  return context_layer
+  return context_layer, attention_scores
 
 
 def transformer_model(input_tensor,
@@ -823,6 +823,7 @@ def transformer_model(input_tensor,
   prev_output = reshape_to_matrix(input_tensor)
 
   all_layer_outputs = []
+  all_attention_scores = []
   for layer_idx in range(num_hidden_layers):
     with tf.variable_scope("layer_%d" % layer_idx):
       layer_input = prev_output
@@ -830,7 +831,7 @@ def transformer_model(input_tensor,
       with tf.variable_scope("attention"):
         attention_heads = []
         with tf.variable_scope("self"):
-          attention_head = attention_layer(
+          attention_head, attention_scores = attention_layer(
               from_tensor=layer_input,
               to_tensor=layer_input,
               attention_mask=attention_mask,
@@ -843,6 +844,7 @@ def transformer_model(input_tensor,
               from_seq_length=seq_length,
               to_seq_length=seq_length)
           attention_heads.append(attention_head)
+          all_attention_scores.append(attention_scores)
 
         attention_output = None
         if len(attention_heads) == 1:
@@ -858,7 +860,7 @@ def transformer_model(input_tensor,
           attention_output = tf.layers.dense(
               attention_output,
               hidden_size,
-              kernel_initializer=create_initializer(initializer_range))
+              kernel_initializer=create_initializer(initializer_range)) # W
           attention_output = dropout(attention_output, hidden_dropout_prob)
           attention_output = layer_norm(attention_output + layer_input)
 
@@ -889,7 +891,7 @@ def transformer_model(input_tensor,
     return final_outputs
   else:
     final_output = reshape_from_matrix(prev_output, input_shape)
-    return final_output
+    return final_output, all_attention_scores,
 
 
 def get_shape_list(tensor, expected_rank=None, name=None):
