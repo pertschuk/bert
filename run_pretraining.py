@@ -230,11 +230,10 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
       checkpoints.append(init_checkpoint)
       assignment_maps.append(assignment_map)
     if FLAGS.teacher_checkpoint:
-      with tf.variable_scope("teacher"):
-        (assignment_map, _
-         ) = modeling.get_assignment_map_from_checkpoint(tvars, FLAGS.teacher_checkpoint)
-        checkpoints.append(FLAGS.teacher_checkpoint)
-        assignment_maps.append(assignment_map)
+      (assignment_map, _
+       ) = modeling.get_assignment_map_from_checkpoint(tvars, FLAGS.teacher_checkpoint, teacher=True)
+      checkpoints.append(FLAGS.teacher_checkpoint)
+      assignment_maps.append(assignment_map)
 
     if use_tpu:
       def tpu_scaffold():
@@ -304,8 +303,8 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
       eval_metrics = (metric_fn, [
         masked_lm_example_loss, masked_lm_log_probs, masked_lm_ids,
-        masked_lm_weights, next_sentence_example_loss,
-        next_sentence_log_probs, next_sentence_labels
+        masked_lm_weights, sentence_order_example_loss,
+        sentence_order_log_probs, sentence_order_labels
       ])
       output_spec = tf.contrib.tpu.TPUEstimatorSpec(
         mode=mode,

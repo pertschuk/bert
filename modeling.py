@@ -314,7 +314,7 @@ def get_activation(activation_string):
     raise ValueError("Unsupported activation: %s" % act)
 
 
-def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
+def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
   """Compute the union of the current variables and checkpoint variables."""
   assignment_map = {}
   initialized_variable_names = {}
@@ -334,7 +334,10 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
     (name, var) = (x[0], x[1])
     if name not in name_to_variable:
       continue
-    assignment_map[name] = name
+    if teacher:
+      assignment_map[name] = 'teacher/' + name
+    else:
+      assignment_map[name] = name
     initialized_variable_names[name] = 1
     initialized_variable_names[name + ":0"] = 1
 
