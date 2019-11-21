@@ -337,7 +337,10 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
     (name, var) = (x[0], x[1])
     if name not in name_to_variable:
       continue
-    assignment_map[name] = name
+    if teacher:
+      assignment_map[name] = name_to_variable['teacher/' + name]
+    else:
+      assignment_map[name] = name
     initialized_variable_names[name] = 1
     initialized_variable_names[name + ":0"] = 1
 
