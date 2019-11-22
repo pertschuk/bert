@@ -2,11 +2,15 @@ import os
 
 
 DATA_DIR = './data'
+OUT_DIR = './msmarco-bio'
 
 # sed 's/	/|n /' collectionandqueries/collection.tsv | sed "s/:/ /g" | sed "s/,/ /g" | sed "s/\./ /g" | tr '[:upper:]' '[:lower:]' | stmr | vw -i model --ngram 2 --skips 1 --predictions preds
 
 def main():
   bioset = set()
+
+  qrels_tsv_path = os.path.join(OUT_DIR, 'qrels.dev.small.tsv')
+  queries_tsv_path = os.path.join(OUT_DIR, 'queries.dev.tsv')
 
   print('loading preds..')
   preds_file = os.path.join(DATA_DIR, 'vw')
@@ -35,7 +39,10 @@ def main():
 
   collection_file = os.path.join(DATA_DIR, 'collection.tsv')
   negative_examples = set()
-  with open(collection_file) as collection, open('bio.tsv', 'w') as bio, open('triples.train.small.tsv', 'w') as train:
+  example_num = 0
+  qrels_dev_file = open(qrels_tsv_path, 'w')
+  queries_dev_file = open(queries_tsv_path, 'w')
+  with open(collection_file) as collection, open(os.path.join(OUT_DIR, 'collection.tsv'), 'w') as bio, open(os.path.join(OUT_DIR, 'triples.train.small.tsv', 'w')) as train:
     for line in collection:
       doc_id, text = line.strip().split('\t')
       if doc_id in bioset:
@@ -43,8 +50,13 @@ def main():
         if doc_id in docs_to_queries:
           qid = docs_to_queries[doc_id]
           if len(negative_examples) > 0:
-            sample = queries[qid] + '\t' + text + '\t' + negative_examples.pop()[1] + '\n'
-            train.write(sample)
+            example_num += 1
+            if example_num < 5000:
+              qrels_dev_file.write('\t'.join([str(qid), '0', str(doc_id), '1']) + '\n')
+              queries_dev_file.write(qid + '\t' + queries[qid] + '\n')
+            else:
+              sample = queries[qid] + '\t' + text + '\t' + negative_examples.pop()[1] + '\n'
+              train.write(sample)
         else:
           negative_examples.add((doc_id, text))
 
