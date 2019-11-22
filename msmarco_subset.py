@@ -8,6 +8,7 @@ DATA_DIR = './data'
 def main():
   bioset = set()
 
+  print('loading preds..')
   preds_file = os.path.join(DATA_DIR, 'vw')
   with open(preds_file) as preds:
     for line in preds:
@@ -16,6 +17,7 @@ def main():
         bioset.add(doc_id.strip())
 
   queries = dict()
+  print('loading queries..')
   query_file_path = os.path.join(DATA_DIR, 'queries.train.tsv')
   with open(query_file_path) as query_file:
     for line in query_file:
@@ -33,7 +35,7 @@ def main():
 
   collection_file = os.path.join(DATA_DIR, 'collection.tsv')
   negative_examples = set()
-  with open(collection_file) as collection, open('bio.tsv') as bio, open('triples.train.small.tsv') as train:
+  with open(collection_file) as collection, open('bio.tsv', 'w') as bio, open('triples.train.small.tsv', 'w') as train:
     for line in collection:
       doc_id, text = line.strip().split('\t')
       if doc_id in bioset:
