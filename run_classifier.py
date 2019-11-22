@@ -223,7 +223,7 @@ class MSMarcoProcessor(DataProcessor):
 
     # start_time = time.time()
 
-    train_dataset_path = './data/triples.train.small.tsv'
+    train_dataset_path = os.path.join(data_dir, 'triples.train.small.tsv')
 
     print('Counting number of examples...')
     num_lines = 100000 # sum(1 for line in open(train_dataset_path, 'r'))
