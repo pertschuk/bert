@@ -229,11 +229,17 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
        ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
       checkpoints.append(init_checkpoint)
       assignment_maps.append(assignment_map)
+      tf.logging.info("*** Student Assignment Map ***")
+      for k, v in assignment_map.items():
+        tf.logging.info("Key: %s, Value: %s" % (k, v))
     if FLAGS.teacher_checkpoint:
       (assignment_map, _
        ) = modeling.get_assignment_map_from_checkpoint(tvars, FLAGS.teacher_checkpoint, teacher=True)
       checkpoints.append(FLAGS.teacher_checkpoint)
       assignment_maps.append(assignment_map)
+      tf.logging.info("*** Teacher Assignment Map ***")
+      for k, v in assignment_map.items():
+        tf.logging.info("Key: %s, Value: %s" % (k, v))
 
     if use_tpu:
       def tpu_scaffold():
