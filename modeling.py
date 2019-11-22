@@ -337,11 +337,10 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
   assignment_map = collections.OrderedDict()
   for x in init_vars:
     (name, var) = (x[0], x[1])
-    tf.logging.info(name)
     if name not in name_to_variable and not 'teacher/' + name in name_to_variable:
       continue
     if teacher:
-      assignment_map[re.sub(r'teacher/', '', name)] = name
+      assignment_map[re.sub(r'teacher/', '', name)] = name_to_variable['teacher/' + name]
     else:
       assignment_map[name] = name
     initialized_variable_names[name] = 1
