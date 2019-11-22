@@ -8,7 +8,7 @@ DATA_DIR = './data'
 def main():
   bioset = set()
 
-  preds_file = os.path.join(DATA_DIR, 'preds')
+  preds_file = os.path.join(DATA_DIR, 'vw')
   with open(preds_file) as preds:
     for line in preds:
       pred, doc_id = line.split('\t')
@@ -41,7 +41,9 @@ def main():
         if doc_id in docs_to_queries:
           qid = docs_to_queries[doc_id]
           if len(negative_examples) > 0:
-            train.write(queries[qid] + '\t' + text + '\t' + negative_examples.pop() + '\n')
+            sample = queries[qid] + '\t' + text + '\t' + negative_examples.pop() + '\n'
+            print(sample)
+            train.write(sample)
         else:
           negative_examples.add((doc_id, text))
 
