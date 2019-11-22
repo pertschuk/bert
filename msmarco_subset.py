@@ -11,8 +11,7 @@ def main():
   preds_file = os.path.join(DATA_DIR, 'vw')
   with open(preds_file) as preds:
     for line in preds:
-      print(line)
-      pred, doc_id = line.strip().split('\t')
+      pred, doc_id = line.strip().split(' ')
       if pred > 0.5:
         bioset.add(doc_id.strip())
 
