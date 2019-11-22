@@ -200,12 +200,13 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
           model.get_embedding_output()))
 
       if FLAGS.pred_distill:
-        (_, _, _, teacher_masked_lm_logits) = get_masked_lm_output(
-          bert_config, model.get_sequence_output(), model.get_embedding_table(),
-          masked_lm_positions, masked_lm_ids, masked_lm_weights)
+        with tf.variable_scope('teacher'):
+          (_, _, _, teacher_masked_lm_logits) = get_masked_lm_output(
+            bert_config, model.get_sequence_output(), model.get_embedding_table(),
+            masked_lm_positions, masked_lm_ids, masked_lm_weights)
 
-        (_, _, _, teacher_sent_order_logits) = get_sentence_order_output(
-          bert_config, teacher.get_pooled_output(), sentence_order_labels)
+          (_, _, _, teacher_sent_order_logits) = get_sentence_order_output(
+            bert_config, teacher.get_pooled_output(), sentence_order_labels)
 
         masked_lm_loss = tf.reduce_mean(tf.squared_difference(teacher_masked_lm_logits,
                                                               student_masked_lm_logits))
