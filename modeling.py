@@ -325,8 +325,9 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
     m = re.match("^(.*):\\d+$", name)
     if m is not None:
       name = m.group(1)
-    tf.logging.info(name)
     if 'teacher' in name:
+      tf.logging.info(name)
+      tf.logging.info(teacher)
       if not teacher: continue
     else:
       if teacher: continue
