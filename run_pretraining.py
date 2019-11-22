@@ -182,7 +182,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
       # project teacher hidden layers down to student hidden layers dims
       with tf.variable_scope('loss'):
-        teacher_hidden_layers = teacher.get_all_encoder_layers(),
+        teacher_hidden_layers = teacher.get_all_encoder_layers()
 
         hidden_loss = tf.add_n([
           tf.reduce_sum(
