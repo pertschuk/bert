@@ -44,7 +44,7 @@ def main():
   example_num = 0
   qrels_dev_file = open(qrels_tsv_path, 'w')
   queries_dev_file = open(queries_tsv_path, 'w')
-  with open(collection_file) as collection, open(os.path.join(OUT_DIR, 'collection.tsv'), 'w') as bio, open(os.path.join(OUT_DIR, 'triples.train.small.tsv', 'w')) as train:
+  with open(collection_file) as collection, open(os.path.join(OUT_DIR, 'collection.tsv'), 'w') as bio, open(os.path.join(OUT_DIR, 'triples.train.small.tsv'), 'w') as train:
     for line in collection:
       doc_id, text = line.strip().split('\t')
       if doc_id in bioset:
