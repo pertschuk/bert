@@ -203,6 +203,79 @@ class DataProcessor(object):
         lines.append(line)
       return lines
 
+class MSMarcoProcessor(DataProcessor):
+  """Processor for the MRPC data set (GLUE version)."""
+
+  def _create_example(self, query, doc, label, set_type, i):
+    guid = "%s-%s" % (set_type, i)
+    text_a = tokenization.convert_to_unicode(query).lower()
+    text_b = tokenization.convert_to_unicode(doc).lower()
+    if set_type == "test":
+      # guid = line[0]
+      label = "0"
+    else:
+      label = tokenization.convert_to_unicode(label).lower()
+    return InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label)
+
+  def get_train_examples(self, data_dir):
+    """See base class."""
+    print('Converting to Train to tfrecord...')
+
+    # start_time = time.time()
+
+    train_dataset_path = './data/triples.train.small.tsv'
+
+    print('Counting number of examples...')
+    num_lines = 100000 # sum(1 for line in open(train_dataset_path, 'r'))
+    print('{} examples found.'.format(num_lines))
+    examples = []
+
+    with open(train_dataset_path, 'r') as f:
+      for i, line in enumerate(f):
+        if i > 2000000:
+          break
+        # if i % 1000 == 0:
+          # print('Processed training set, line {} of {} in {} sec'.format(
+          #   i, num_lines, time_passed))
+          # hours_remaining = (num_lines - i) * time_passed / (max(1.0, i) * 3600)
+          # print('Estimated hours remaining to write the training set: {}'.format(
+          #   hours_remaining))
+
+        query, positive_doc, negative_doc = line.rstrip().split('\t')
+        examples.append(self._create_example(query, positive_doc, str(1), 'train', i))
+        examples.append(self._create_example(query, negative_doc, str(0), 'train', i + 0.5))
+    return examples
+
+  def get_dev_examples(self, data_dir):
+    """See base class."""
+    return []
+
+  def get_test_examples(self, data_dir):
+    """See base class."""
+    return self.get_dev_examples(data_dir)
+
+  def get_labels(self):
+    """See base class."""
+    return ["0", "1"]
+
+  def _create_examples(self, lines, set_type):
+    """Creates examples for the training and dev sets."""
+    examples = []
+    for (i, line) in enumerate(lines):
+      if i == 0:
+        continue
+      guid = "%s-%s" % (set_type, i)
+      text_a = tokenization.convert_to_unicode(line[3]).lower()
+      text_b = tokenization.convert_to_unicode(line[4]).lower()
+      if set_type == "test":
+        guid = line[0]
+        label = "0"
+      else:
+        label = tokenization.convert_to_unicode(line[0]).lower()
+      examples.append(
+        InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+    return examples
+
 
 class XnliProcessor(DataProcessor):
   """Processor for the XNLI data set."""
@@ -788,6 +861,7 @@ def main(_):
       "mnli": MnliProcessor,
       "mrpc": MrpcProcessor,
       "xnli": XnliProcessor,
+      "msmarco": MSMarcoProcessor
   }
 
   tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
