@@ -12,6 +12,8 @@ def main():
   qrels_tsv_path = os.path.join(OUT_DIR, 'qrels.dev.small.tsv')
   queries_tsv_path = os.path.join(OUT_DIR, 'queries.dev.tsv')
 
+  os.makedirs(OUT_DIR, exist_ok=True)
+
   print('loading preds..')
   preds_file = os.path.join(DATA_DIR, 'vw')
   with open(preds_file) as preds:
