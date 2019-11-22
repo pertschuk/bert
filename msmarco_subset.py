@@ -12,7 +12,7 @@ def main():
   with open(preds_file) as preds:
     for line in preds:
       pred, doc_id = line.strip().split(' ')
-      if pred > 0.5:
+      if float(pred) > 0.5:
         bioset.add(doc_id.strip())
 
   queries = dict()
