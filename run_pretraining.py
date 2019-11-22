@@ -229,27 +229,37 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
        ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
       checkpoints.append(init_checkpoint)
       assignment_maps.append(assignment_map)
-      tf.logging.info("*** Student Assignment Map ***")
-      for k, v in assignment_map.items():
-        tf.logging.info("Key: %s, Value: %s" % (k, v))
+      # tf.logging.info("*** Student Assignment Map ***")
+      # for k, v in assignment_map.items():
+      #   tf.logging.info("Key: %s, Value: %s" % (k, v))
     if FLAGS.teacher_checkpoint:
       (assignment_map, _
        ) = modeling.get_assignment_map_from_checkpoint(tvars, FLAGS.teacher_checkpoint, teacher=True)
       checkpoints.append(FLAGS.teacher_checkpoint)
       assignment_maps.append(assignment_map)
-      tf.logging.info("*** Teacher Assignment Map ***")
-      for k, v in assignment_map.items():
-        tf.logging.info("Key: %s, Value: %s" % (k, v))
+      # tf.logging.info("*** Teacher Assignment Map ***")
+      # for k, v in assignment_map.items():
+      #   tf.logging.info("Key: %s, Value: %s" % (k, v))
 
     if use_tpu:
       def tpu_scaffold():
         for c, a in zip(checkpoints, assignment_maps):
+          tf.logging.info("*** Checkpoint ***")
+          tf.logging.info(c)
+          tf.logging.info("*** Assignment Map ***")
+          for k, v in a.items():
+            tf.logging.info("Key: %s, Value: %s" % (k, v))
           tf.train.init_from_checkpoint(c, a)
         return tf.train.Scaffold()
 
       scaffold_fn = tpu_scaffold
     else:
       for c, a in zip(checkpoints, assignment_maps):
+        tf.logging.info("*** Checkpoint ***")
+        tf.logging.info(c)
+        tf.logging.info("*** Assignment Map ***")
+        for k, v in a.items():
+          tf.logging.info("Key: %s, Value: %s" % (k, v))
         tf.train.init_from_checkpoint(c, a)
 
     tf.logging.info("**** Trainable Variables ****")
