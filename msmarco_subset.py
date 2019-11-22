@@ -44,7 +44,6 @@ def main():
           qid = docs_to_queries[doc_id]
           if len(negative_examples) > 0:
             sample = queries[qid] + '\t' + text + '\t' + negative_examples.pop()[1] + '\n'
-            print(sample)
             train.write(sample)
         else:
           negative_examples.add((doc_id, text))
