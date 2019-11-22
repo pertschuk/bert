@@ -340,7 +340,7 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
     if name not in name_to_variable and not 'teacher/' + name in name_to_variable:
       continue
     if teacher:
-      assignment_map[re.sub(r'teacher/', '', name)] = name_to_variable['teacher/' + name]
+      assignment_map['/'+name] = name_to_variable['teacher/' + name]
     else:
       assignment_map[name] = name
     initialized_variable_names[name] = 1
