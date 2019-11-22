@@ -325,10 +325,12 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
     m = re.match("^(.*):\\d+$", name)
     if m is not None:
       name = m.group(1)
-    if teacher:
-      name_to_variable['teacher/'+ name] = var
+    if 'teacher' in name:
+      if not teacher: continue
     else:
-      name_to_variable[name] = var
+      if teacher: continue
+    name_to_variable[name] = var
+
 
   init_vars = tf.train.list_variables(init_checkpoint)
 
@@ -338,7 +340,7 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, teacher=False):
     if name not in name_to_variable:
       continue
     if teacher:
-      assignment_map[name] = name_to_variable['teacher/' + name]
+      assignment_map[re.sub(r'teacher/', '', name)] = name
     else:
       assignment_map[name] = name
     initialized_variable_names[name] = 1
