@@ -466,11 +466,11 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
 
   if isinstance(example, PaddingInputExample):
     return InputFeatures(
-        input_ids=[0] * max_seq_length,
-        input_mask=[0] * max_seq_length,
-        segment_ids=[0] * max_seq_length,
-        label_id=0,
-        is_real_example=False)
+      input_ids=[0] * max_seq_length,
+      input_mask=[0] * max_seq_length,
+      segment_ids=[0] * max_seq_length,
+      label_id=0,
+      is_real_example=False)
 
   label_map = {}
   for (i, label) in enumerate(label_list):
@@ -491,7 +491,7 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     if len(tokens_a) > max_seq_length - 2:
       tokens_a = tokens_a[0:(max_seq_length - 2)]
 
-  # The convention in BERT is:
+  # The convention in ALBERT is:
   # (a) For sequence pairs:
   #  tokens:   [CLS] is this jack ##son ##ville ? [SEP] no it is not . [SEP]
   #  type_ids: 0     0  0    0    0     0       0 0     1  1  1  1   1 1
@@ -547,18 +547,18 @@ def convert_single_example(ex_index, example, label_list, max_seq_length,
     tf.logging.info("*** Example ***")
     tf.logging.info("guid: %s" % (example.guid))
     tf.logging.info("tokens: %s" % " ".join(
-        [tokenization.printable_text(x) for x in tokens]))
+      [tokenization.printable_text(x) for x in tokens]))
     tf.logging.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
     tf.logging.info("input_mask: %s" % " ".join([str(x) for x in input_mask]))
     tf.logging.info("segment_ids: %s" % " ".join([str(x) for x in segment_ids]))
     tf.logging.info("label: %s (id = %d)" % (example.label, label_id))
 
   feature = InputFeatures(
-      input_ids=input_ids,
-      input_mask=input_mask,
-      segment_ids=segment_ids,
-      label_id=label_id,
-      is_real_example=True)
+    input_ids=input_ids,
+    input_mask=input_mask,
+    segment_ids=segment_ids,
+    label_id=label_id,
+    is_real_example=True)
   return feature
 
 
