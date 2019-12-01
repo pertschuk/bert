@@ -75,6 +75,19 @@ flags.DEFINE_bool(
     "do_predict", False,
     "Whether to run the model in inference mode on the test set.")
 
+flags.DEFINE_string(
+  "teacher_config_file", None,
+  "The config json file corresponding to the teacher BERT model. "
+  "This specifies the model architecture.")
+
+flags.DEFINE_string(
+  "teacher_checkpoint", None,
+  "Initial checkpoint for teacher model (usually from a pre-trained BERT model).")
+
+flags.DEFINE_bool("distill", False, "Whether to run distillation.")
+
+flags.DEFINE_bool("pred_distill", False, "Whether to run distillation on the prediction layer.")
+
 flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
 
 flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
