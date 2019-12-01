@@ -36,6 +36,9 @@ flags.DEFINE_string(
     "The input data dir. Should contain the .tsv files (or other data files) "
     "for the task.")
 
+flags.DEFINE_string("spm_model_file", None,
+                    "The model file for sentence piece tokenization.")
+
 flags.DEFINE_string(
     "bert_config_file", None,
     "The config json file corresponding to the pre-trained BERT model. "
@@ -904,7 +907,8 @@ def main(_):
   label_list = processor.get_labels()
 
   tokenizer = tokenization.FullTokenizer(
-      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
+    vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case,
+    spm_model_file=FLAGS.spm_model_file)
 
   tpu_cluster_resolver = None
   if FLAGS.use_tpu and FLAGS.tpu_name:
